@@ -8,6 +8,7 @@ Representa la capa "Controlador" en la arquitectura MVC.
 from datetime import datetime
 
 from flask import flash, jsonify, redirect, render_template, request, url_for
+from flask_login import login_required, current_user
 
 from extensions import db
 from models.task import Task
@@ -24,42 +25,39 @@ def register_routes(app):
     @app.route("/")
     def index():
         """
-        Ruta principal - Redirige a la lista de tareas
-
-        Returns:
-            Response: Redirección a la lista de tareas
+        Ruta principal - Redirige a login o a la lista de tareas
         """
-        return redirect(url_for("task_list"))
+        if current_user.is_authenticated:
+            return redirect(url_for("task_list"))
+        return redirect(url_for("auth.login"))
 
     @app.route("/tasks")
+    @login_required
     def task_list():
         """
-        Muestra la lista de todas las tareas
-
-        Query Parameters:
-            filter (str): Filtro para mostrar tareas ('all', 'pending', 'completed')
-            sort (str): Ordenamiento ('date', 'title', 'created')
-
-        Returns:
-            str: HTML renderizado con la lista de tareas
+        Muestra la lista de tareas DEL USUARIO ACTUAL
         """
-
         filter_type = request.args.get("filter", "all")
         sort_by = request.args.get("sort", "created")
 
-        # Por ahora, solo mostrar una lista vacía
-        tasks = []
+        # Obtener SOLO las tareas del usuario actual
+        tasks = Task.query.filter_by(user_id=current_user.id)
 
+        # Aplicar filtro
         if filter_type == "pending":
-            tasks = Task.get_pending_tasks()
+            tasks = tasks.filter_by(completed=False)
         elif filter_type == "completed":
-            tasks = Task.get_completed_tasks()
+            tasks = tasks.filter_by(completed=True)
         elif filter_type == "overdue":
-            tasks = Task.get_overdue_tasks()
-        else:
-            tasks = Task.get_all_tasks()
+            tasks = tasks.filter(
+                Task.due_date.is_not(None),
+                Task.due_date < datetime.now(),
+                Task.completed == False,
+            )
 
-        # ordenar segun el criterio selecionado
+        tasks = tasks.all()
+
+        # Ordenar
         if sort_by == "date":
             tasks.sort(key=lambda t: t.due_date or datetime.max)
         elif sort_by == "title":
@@ -67,28 +65,28 @@ def register_routes(app):
         else:
             tasks.sort(key=lambda t: t.created_at, reverse=True)
 
-        # Datos para pasar a la plantilla
+        # Contar tareas del usuario
+        user_tasks = Task.query.filter_by(user_id=current_user.id)
+        total = user_tasks.count()
+        pending = user_tasks.filter_by(completed=False).count()
+        completed = user_tasks.filter_by(completed=True).count()
+
         context = {
             "tasks": tasks,
             "filter_type": filter_type,
             "sort_by": sort_by,
-            "total_tasks": len(tasks),
-            "pending_count": len(Task.get_pending_tasks()),
-            "completed_count": len(Task.get_completed_tasks()),
+            "total_tasks": total,
+            "pending_count": pending,
+            "completed_count": completed,
         }
 
         return render_template("task_list.html", **context)
 
     @app.route("/tasks/new", methods=["GET", "POST"])
+    @login_required
     def task_create():
         """
-        Crea una nueva tarea
-
-        GET: Muestra el formulario de creación
-        POST: Procesa los datos del formulario y crea la tarea
-
-        Returns:
-            str: HTML del formulario o redirección tras crear la tarea
+        Crea una nueva tarea para el usuario actual
         """
         if request.method == "POST":
             title = request.form.get("title")
@@ -108,48 +106,31 @@ def register_routes(app):
                 )
                 return render_template("task_form.html")
 
+            # Crear tarea asociada al usuario actual
             task = Task(title, description, due_date)
+            task.user_id = current_user.id
             task.save()
 
             flash("Tarea creada con éxito", "success")
             return redirect(url_for("task_list"))
 
-        # Mostrar formulario de creación
         return render_template("task_form.html")
 
-    @app.route("/tasks/<int:task_id>")
-    def task_detail(task_id):
-        """
-        Muestra los detalles de una tarea específica
-
-        Args:
-            task_id (int): ID de la tarea a mostrar
-
-        Returns:
-            str: HTML con los detalles de la tarea
-        """
-        pass  # TODO: implementar el método
-
     @app.route("/tasks/<int:task_id>/edit", methods=["GET", "POST"])
+    @login_required
     def task_edit(task_id):
         """
-        Edita una tarea existente
-
-        Args:
-            task_id (int): ID de la tarea a editar
-
-        GET: Muestra el formulario de edición con datos actuales
-        POST: Procesa los cambios y actualiza la tarea
-
-        Returns:
-            str: HTML del formulario o redirección tras editar
+        Edita una tarea existente (solo si pertenece al usuario actual)
         """
-        task = Task.query.get_or_404(task_id)
+        # Solo puede editar SUS propias tareas
+        task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
+
         if request.method == "POST":
             task.title = request.form.get("title")
             if not task.title or task.title.strip() == "":
                 flash("El título no puede estar vacío", "error")
                 return render_template("task_form.html", task=task)
+
             task.description = request.form.get("description")
             due_date_str = request.form.get("due_date")
             due_date = None
@@ -168,62 +149,32 @@ def register_routes(app):
             flash("Tarea editada con éxito", "success")
             return redirect(url_for("task_list"))
 
-        # Mostrar el formulario para editar la tarea
         return render_template("task_form.html", task=task)
 
     @app.route("/tasks/<int:task_id>/delete", methods=["POST"])
+    @login_required
     def task_delete(task_id):
         """
-        Elimina una tarea
-
-        Args:
-            task_id (int): ID de la tarea a eliminar
-
-        Returns:
-            Response: Redirección a la lista de tareas
+        Elimina una tarea (solo si pertenece al usuario actual)
         """
-        task = Task.query.get_or_404(task_id)
+        task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
         task.delete()
         flash("Tarea eliminada con éxito", "success")
         return redirect(url_for("task_list"))
 
     @app.route("/tasks/<int:task_id>/toggle", methods=["POST"])
+    @login_required
     def task_toggle(task_id):
         """
-        Cambia el estado de completado de una tarea
-
-        Args:
-            task_id (int): ID de la tarea a cambiar
-
-        Returns:
-            Response: Redirección a la lista de tareas
+        Cambia el estado de completado (solo si pertenece al usuario actual)
         """
-        task = Task.query.get_or_404(task_id)
+        task = Task.query.filter_by(id=task_id, user_id=current_user.id).first_or_404()
         if task.completed:
             task.mark_pending()
         else:
             task.mark_completed()
         flash("Estado de tarea actualizado con éxito", "success")
         return redirect(url_for("task_list"))
-
-    # Rutas adicionales para versiones futuras
-
-    @app.route("/api/tasks", methods=["GET"])
-    def api_tasks():
-        """
-        API endpoint para obtener tareas en formato JSON
-        (Para versiones futuras con JavaScript)
-
-        Returns:
-            json: Lista de tareas en formato JSON
-        """
-        # TODO: para versiones futuras
-        return jsonify(
-            {
-                "tasks": [],
-                "message": "API en desarrollo - Implementar en versiones futuras",
-            }
-        )
 
     @app.errorhandler(404)
     def not_found_error(error):

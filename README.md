@@ -93,9 +93,9 @@ pip install -r requirements.txt
 
 **Objetivo**: Agregar sistema de usuarios
 
-- [ ] Registro e inicio de sesión de usuarios
-- [ ] Asociar tareas a usuarios específicos
-- [ ] Proteger rutas con autenticación
+- [x] Registro e inicio de sesión de usuarios
+- [x] Asociar tareas a usuarios específicos
+- [x] Proteger rutas con autenticación
 
 **Archivos nuevos**: `models/user.py`, `controllers/auth_controller.py`, plantillas de autenticación
 
@@ -103,6 +103,7 @@ pip install -r requirements.txt
 
 - [Flask](https://flask.palletsprojects.com/en/stable/): Framework web de Python
 - [SQLAlchemy](https://docs.sqlalchemy.org/en/20/): ORM para manejo de base de datos
+- [Flask-Login](https://flask-login.readthedocs.io/): Manejo de sesiones de usuario
 - [Jinja](https://jinja.palletsprojects.com/en/stable/): Motor de plantillas (incluido con Flask)
 - [SQLite](https://www.sqlite.org/docs.html): Base de datos ligera para desarrollo
 - [HTML](https://lenguajehtml.com/)/[CSS](https://lenguajecss.com): Para la interfaz de usuario

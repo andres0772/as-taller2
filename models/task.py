@@ -28,6 +28,10 @@ class Task(db.Model):
         db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False
     )
 
+    # Relación con Usuario - cada tarea pertenece a un usuario
+    user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    user = db.relationship("User", backref="tasks")
+
     def __init__(self, title, description=None, due_date=None):
         """
         Constructor del modelo Task
