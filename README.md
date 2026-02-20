@@ -62,10 +62,10 @@ pip install -r requirements.txt
 
 **Objetivo**: Implementar las operaciones básicas CRUD
 
-- [ ] Crear una tarea: título, descripción, estado (pendiente/hecha), fecha de vencimiento
-- [ ] Leer (listar) todas las tareas
-- [ ] Editar una tarea existente
-- [ ] Eliminar una tarea
+- [x] Crear una tarea: título, descripción, estado (pendiente/hecha), fecha de vencimiento
+- [x] Leer (listar) todas las tareas
+- [x] Editar una tarea existente
+- [x] Eliminar una tarea
 
 **Archivos a modificar**: `models/task.py`, `controllers/task_controller.py`, `templates/*.html`
 
@@ -73,9 +73,9 @@ pip install -r requirements.txt
 
 **Objetivo**: Agregar validaciones y mejorar la presentación
 
-- [ ] Validación básica en formularios (campos requeridos, fecha válida)
-- [ ] Plantillas Jinja reutilizables usando `layout.html`
-- [ ] Estilos básicos con CSS o Bootstrap
+- [x] Validación básica en formularios (campos requeridos, fecha válida)
+- [x] Plantillas Jinja reutilizables usando `layout.html`
+- [x] Estilos básicos con CSS o Bootstrap
 
 **Archivos a modificar**: `templates/*.html`, `static/style.css`, `controllers/task_controller.py`
 
@@ -83,9 +83,9 @@ pip install -r requirements.txt
 
 **Objetivo**: Añadir funcionalidades de filtrado y ordenamiento
 
-- [ ] Filtrar tareas por estado (pendiente, completada)
-- [ ] Ordenar tareas por fecha de vencimiento
-- [ ] Mostrar tareas vencidas en otro color
+- [x] Filtrar tareas por estado (pendiente, completada)
+- [x] Ordenar tareas por fecha de vencimiento
+- [x] Mostrar tareas vencidas en otro color
 
 **Archivos a modificar**: `controllers/task_controller.py`, `templates/task_list.html`, `static/style.css`
 
