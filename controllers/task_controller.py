@@ -81,12 +81,22 @@ def register_routes(app):
             str: HTML del formulario o redirección tras crear la tarea
         """
         if request.method == "POST":
-            title = request.form["title"]
-            description = request.form["description"]
-            due_date_str = request.form["due_date"]
+            title = request.form.get("title")
+            if not title or title.strip() == "":
+                flash("El título no puede estar vacío", "error")
+                return render_template("task_form.html")
+
+            description = request.form.get("description")
+            due_date_str = request.form.get("due_date")
             due_date = None
             if due_date_str:
                 due_date = datetime.strptime(due_date_str, "%Y-%m-%dT%H:%M")
+            if due_date and due_date < datetime.now():
+                flash(
+                    "La fecha de vencimiento no puede ser anterior a la fecha actual",
+                    "error",
+                )
+                return render_template("task_form.html")
 
             task = Task(title, description, due_date)
             task.save()
@@ -126,13 +136,22 @@ def register_routes(app):
         """
         task = Task.query.get_or_404(task_id)
         if request.method == "POST":
-            task.title = request.form["title"]
+            task.title = request.form.get("title")
+            if not task.title or task.title.strip() == "":
+                flash("El título no puede estar vacío", "error")
+                return render_template("task_form.html", task=task)
             task.description = request.form.get("description")
             due_date_str = request.form.get("due_date")
             due_date = None
             if due_date_str:
                 due_date = datetime.strptime(due_date_str, "%Y-%m-%dT%H:%M")
             task.due_date = due_date
+            if task.due_date and task.due_date < datetime.now():
+                flash(
+                    "La fecha de vencimiento no puede ser anterior a la fecha actual",
+                    "error",
+                )
+                return render_template("task_form.html", task=task)
             task.completed = "completed" in request.form
             task.save()
 
