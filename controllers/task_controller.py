@@ -54,8 +54,18 @@ def register_routes(app):
             tasks = Task.get_pending_tasks()
         elif filter_type == "completed":
             tasks = Task.get_completed_tasks()
+        elif filter_type == "overdue":
+            tasks = Task.get_overdue_tasks()
         else:
             tasks = Task.get_all_tasks()
+
+        # ordenar segun el criterio selecionado
+        if sort_by == "date":
+            tasks.sort(key=lambda t: t.due_date or datetime.max)
+        elif sort_by == "title":
+            tasks.sort(key=lambda t: t.title.lower())
+        else:
+            tasks.sort(key=lambda t: t.created_at, reverse=True)
 
         # Datos para pasar a la plantilla
         context = {

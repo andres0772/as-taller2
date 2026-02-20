@@ -18,7 +18,7 @@
 
 body {
     background-color: var(--bg-light);
-    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-family: "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     color: var(--dark-color);
 }
 
@@ -38,7 +38,9 @@ a {
 }
 
 main {
-    min-height: calc(100vh - 120px); /* Ajusta la altura para que el footer no se superponga */
+    min-height: calc(
+        100vh - 120px
+    ); /* Ajusta la altura para que el footer no se superponga */
     padding-bottom: 2rem;
 }
 
@@ -59,7 +61,6 @@ main {
 .footer h6 {
     font-size: 0.85rem;
 }
-
 
 /* Estilos de los Mensajes Flash */
 
@@ -91,17 +92,30 @@ main {
 
 /* Animación para los mensajes que se ocultan */
 @keyframes fadeInOut {
-    0% { opacity: 0; transform: translateY(-20px); }
-    10% { opacity: 1; transform: translateY(0); }
-    90% { opacity: 1; transform: translateY(0); }
-    100% { opacity: 0; transform: translateY(-20px); }
+    0% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    10% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    90% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
 }
-
 
 /* Estilos de la Tabla de Tareas */
 
 .table-tasks tbody tr {
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    transition:
+        background-color 0.3s ease,
+        transform 0.2s ease;
 }
 
 .table-tasks tbody tr:hover {
@@ -144,13 +158,22 @@ main {
 }
 
 /* TODO: Estado completado */
-.task-completed .badge-status { }
+.task-completed .badge-status {
+    background-color: var(--success-color);
+    color: white;
+}
 
 /* TODO: Estado pendiente */
-.task-pending .badge-status { }
+.task-pending .badge-status {
+    background-color: var(--warning-color);
+    color: white;
+}
 
 /* TODO: Estado vencido */
-.task-overdue .badge-status { }
+.task-overdue .badge-status {
+    background-color: var(--danger-color);
+    color: white;
+}
 
 .task-completed td {
     text-decoration: line-through;
@@ -189,4 +212,3 @@ main {
 .modal-header .modal-title {
     font-weight: 600;
 }
-
