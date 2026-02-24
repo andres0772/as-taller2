@@ -1,5 +1,7 @@
 # taller #2 de Arquitectura de Software: MVC
 
+# Andres esteban vasquez peña
+
 ## Descripción
 
 Este proyecto proporciona una plantilla para la implementación de una aplicación web siguiendo el patrón **Modelo** - **Vista** - **Controlador** (**MVC**)
